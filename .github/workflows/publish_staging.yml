@@ -1,0 +1,115 @@
+name: Publish Staging
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [publish_webflow]
+
+jobs:
+  publish-target:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    env:
+      SITE: ${{ github.event.client_payload.site }}
+    outputs:
+      site: ${{ steps.regex-match.outputs.match }}
+    steps:
+      - uses: actions-ecosystem/action-regex-match@v2
+        id: regex-match
+        with:
+          text: ${{ github.event.client_payload.site }}
+          regex: '[a-z_\-]+\.webflow\.io'
+
+  scrape:
+    needs: [publish-target]
+    timeout-minutes: 10
+    if: ${{ needs.publish-target.outputs.site != '' }}
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: staging
+      SITE: ${{ needs.publish-target.outputs.site }}
+      CDN_URL: ${{ secrets.CDN_URL }}
+      WEBFLOW_CDN_URL: https://assets.website-files.com/
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      BRANCH_NAME: staging
+      PREVIEW_DOMAIN: ${{ secrets.PREVIEW_DOMAIN }}
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: master
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Reset branch
+        run: |
+          if [ "`git branch -r | egrep staging`" ]
+          then
+            git push origin --delete ${{ env.BRANCH_NAME }}
+          fi
+          git checkout -b ${{ env.BRANCH_NAME }} master
+          git pull origin master
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      # yarn caching
+      - uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install Dependencies
+        run: |
+          yarn
+
+      - name: Run scraper
+        run: |
+          yarn scrape
+
+      - name: Send slack notification
+        if: failure()
+        run: |
+          curl -X POST -H "Content-type: application/json" --data '{"text": "<!channel> Scraper failed for ${{ env.SITE }}"}' ${{ secrets.SLACK_HOOK }}
+
+      # Without any changes it will not trigger deploys
+      - name: fake
+        run: |
+          echo $(date '+%s') > test.txt
+
+      - name: Commit and push
+        uses: actions-js/push@v1.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          message: 'Automatic: scrape'
+          branch: ${{ env.BRANCH_NAME }}
+          force: true
+
+      - name: Actually push
+        run: |
+          git push origin ${{ env.BRANCH_NAME }}
+
+      - name: Run test
+        id: test
+        run: |
+          SITE=${{ env.SITE }} yarn test
+
+      - name: Send slack notification
+        if: failure()
+        run: |
+          curl -X POST -H "Content-type: application/json" --data '{"text": "<!channel> Tests failed for ${{ env.SITE }}: https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}?check_suite_focus=true"}' ${{ secrets.SLACK_HOOK }}
+
+      - name: Send slack notification
+        if: success()
+        run: |
+          echo "SITE_PATH=$(echo "${{ env.SITE }}" | sed -e 's/https:\/\///g' -e 's:/*$::')" >> $GITHUB_ENV
+          curl -X POST -H "Content-type: application/json" --data '{"text": "Tests successful for ${{ env.SITE }}"}' ${{ secrets.SLACK_HOOK }}
+
+      - name: Send preview url notification
+        if: success()
+        run: |
+          curl -X POST -H "Content-type: application/json" --data '{"text": "Preview Deployed: ${{ env.PREVIEW_DOMAIN }}${{ env.SITE_PATH }}"}' ${{ secrets.SLACK_HOOK }}

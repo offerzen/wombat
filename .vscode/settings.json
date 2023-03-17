@@ -1,0 +1,10 @@
+{
+  "yaml.schemas": {
+    "file:///Users/jethroflanagan/.vscode/extensions/atlassian.atlascode-2.10.0/resources/schemas/pipelines-schema.json": "bitbucket-pipelines.yml",
+    "https://json.schemastore.org/github-workflow.json": [
+      "file:///Users/jethroflanagan/Work/offerzen/webflow-platform/.github/workflows/publish_staging.yml",
+      "file:///Users/jethroflanagan/Work/offerzen/webflow-platform/.github/workflows/deploy.yml",
+      "file:///Users/jethroflanagan/Work/offerzen/webflow-platform/.github/workflows/publish.yml"
+    ]
+  }
+}
