@@ -152,7 +152,7 @@ jobs:
           echo "SITE_PATH=$(echo "${{ env.SITE }}" | sed -e 's/https:\/\///g' -e 's:/*$::')" >> $GITHUB_ENV
 
       - name: Upload transformed sites
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: static-files
           path: static/
