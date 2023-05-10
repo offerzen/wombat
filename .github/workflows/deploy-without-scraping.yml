@@ -29,7 +29,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       # yarn caching
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
