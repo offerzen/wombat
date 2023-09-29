@@ -169,50 +169,6 @@ jobs:
         run: |
           curl -X POST -H "Content-type: application/json" --data '{"text": "Production Deployed: ${{ env.PREVIEW_DOMAIN }}${{ env.SITE_PATH }}"}' ${{ secrets.SLACK_HOOK }}
 
-  deploy-test:
-    needs: [build]
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Set shared environment variables
-        uses: offerzen/action-env-vars-from-ssm@v1
-        with:
-          path: '/shared/'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.ORG_AWS_ACCESS_KEY_ID_GHA }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.ORG_AWS_SECRET_ACCESS_KEY_GHA }}
-          AWS_DEFAULT_REGION: ${{ secrets.ORG_AWS_REGION }}
-          AWS_ROLE_ARN: ${{ secrets.ORG_AWS_ROLE_ARN_GHA_TEST }}
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.ORG_AWS_ACCESS_KEY_ID_GHA }}
-          aws-secret-access-key: ${{ secrets.ORG_AWS_SECRET_ACCESS_KEY_GHA }}
-          aws-region: ${{ secrets.ORG_AWS_REGION }}
-          role-to-assume: ${{ secrets.ORG_AWS_ROLE_ARN_GHA_TEST }}
-          role-duration-seconds: 900
-
-      - name: Download transformed sites
-        uses: actions/download-artifact@v2
-        with:
-          name: static-files
-          path: static/
-
-      - name: Upload build to S3 bucket
-        env:
-          S3_DEPLOY_PATH: "s3://$S3_BUCKET_NAME_CDN/${{ github.event.repository.id }}"
-        run: |
-          echo "Uploading non-HTML files to ${{ env.S3_DEPLOY_PATH }}"
-          aws s3 sync --no-progress --exclude *.html static/ ${{ env.S3_DEPLOY_PATH }}
-          echo
-          echo "Uploading HTML files to S3 with 'cache-control:no-cache' header..."
-          aws s3 sync --no-progress --include *.html --content-type "text/html;charset=utf-8" --cache-control no-cache static/ ${{ env.S3_DEPLOY_PATH }}
-
   deploy-staging:
     needs: [build]
     runs-on: ubuntu-latest
