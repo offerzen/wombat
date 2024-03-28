@@ -71,18 +71,18 @@ jobs:
         with:
           path: '/shared/'
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.ORG_AWS_ACCESS_KEY_ID_GHA }}
+          AWS_ACCESS_KEY_ID: ${{ vars.ORG_AWS_ACCESS_KEY_ID_GHA }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.ORG_AWS_SECRET_ACCESS_KEY_GHA }}
           AWS_DEFAULT_REGION: ${{ secrets.ORG_AWS_REGION }}
-          AWS_ROLE_ARN: ${{ secrets.ORG_AWS_ROLE_ARN_GHA_PRODUCTION }}
+          AWS_ROLE_ARN: ${{ vars.ORG_AWS_ROLE_ARN_GHA_PRODUCTION }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.ORG_AWS_ACCESS_KEY_ID_GHA }}
+          aws-access-key-id: ${{ vars.ORG_AWS_ACCESS_KEY_ID_GHA }}
           aws-secret-access-key: ${{ secrets.ORG_AWS_SECRET_ACCESS_KEY_GHA }}
           aws-region: ${{ secrets.ORG_AWS_REGION }}
-          role-to-assume: ${{ secrets.ORG_AWS_ROLE_ARN_GHA_PRODUCTION }}
+          role-to-assume: ${{ vars.ORG_AWS_ROLE_ARN_GHA_PRODUCTION }}
           role-duration-seconds: 900
 
       - name: Download transformed sites
