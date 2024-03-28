@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 7
     steps:
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: master
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -64,7 +64,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set shared environment variables
         uses: offerzen/action-env-vars-from-ssm@v1
