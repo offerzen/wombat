@@ -198,7 +198,7 @@ jobs:
           role-duration-seconds: 900
 
       - name: Download transformed sites
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: static-files
           path: static/
@@ -242,7 +242,7 @@ jobs:
           role-duration-seconds: 900
 
       - name: Download transformed sites
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: static-files
           path: static/
