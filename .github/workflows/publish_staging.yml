@@ -39,7 +39,7 @@ jobs:
         node-version: [16.x]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: master
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -54,11 +54,11 @@ jobs:
           git pull origin master
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       # yarn caching
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
@@ -82,7 +82,7 @@ jobs:
           echo $(date '+%s') > test.txt
 
       - name: Commit and push
-        uses: actions-js/push@v1.3
+        uses: actions-js/push@v1.4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           message: 'Automatic: scrape'

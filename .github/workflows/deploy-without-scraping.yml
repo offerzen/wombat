@@ -18,18 +18,18 @@ jobs:
     timeout-minutes: 7
     steps:
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: master
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
       # yarn caching
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
@@ -40,7 +40,7 @@ jobs:
           echo "SITE_PATH=$(echo "${{ env.SITE }}" | sed -e 's/https:\/\///g' -e 's:/*$::')" >> $GITHUB_ENV
 
       - name: Upload transformed sites
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: static-files
           path: static/
@@ -64,29 +64,29 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set shared environment variables
         uses: offerzen/action-env-vars-from-ssm@v1
         with:
           path: '/shared/'
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.ORG_AWS_ACCESS_KEY_ID_GHA }}
+          AWS_ACCESS_KEY_ID: ${{ vars.ORG_AWS_ACCESS_KEY_ID_GHA }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.ORG_AWS_SECRET_ACCESS_KEY_GHA }}
           AWS_DEFAULT_REGION: ${{ secrets.ORG_AWS_REGION }}
-          AWS_ROLE_ARN: ${{ secrets.ORG_AWS_ROLE_ARN_GHA_PRODUCTION }}
+          AWS_ROLE_ARN: ${{ vars.ORG_AWS_ROLE_ARN_GHA_PRODUCTION }}
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ORG_AWS_ACCESS_KEY_ID_GHA }}
+          aws-access-key-id: ${{ vars.ORG_AWS_ACCESS_KEY_ID_GHA }}
           aws-secret-access-key: ${{ secrets.ORG_AWS_SECRET_ACCESS_KEY_GHA }}
           aws-region: ${{ secrets.ORG_AWS_REGION }}
-          role-to-assume: ${{ secrets.ORG_AWS_ROLE_ARN_GHA_PRODUCTION }}
+          role-to-assume: ${{ vars.ORG_AWS_ROLE_ARN_GHA_PRODUCTION }}
           role-duration-seconds: 900
 
       - name: Download transformed sites
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: static-files
           path: static/
