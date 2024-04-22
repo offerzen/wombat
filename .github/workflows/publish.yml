@@ -77,7 +77,7 @@ jobs:
           git checkout -b ${{ env.BRANCH_NAME }}
 
       - name: Commit and push
-        uses: actions-js/push@v1.4
+        uses: actions-js/push@v1.5
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           message: 'Automatic: scrape'
