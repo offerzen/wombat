@@ -20,7 +20,7 @@
     "fs-extra": "^10.1.0",
     "html-minifier": "^4.0.0",
     "jest": "^28.1.1",
-    "rimraf": "^3.0.2",
+    "rimraf": "^5.0.7",
     "sitemapper": "^3.2.2",
     "uncss": "^0.17.3",
     "url-join": "^5.0.0",
